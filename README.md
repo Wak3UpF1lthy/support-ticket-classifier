@@ -1,65 +1,131 @@
-# ai-builder-lab
+# AI Support Ticket Classifier
 
-Классификатор заявок на Node.js с локальным режимом и отдельной интеграцией с GPT-OSS 20B через GroqCloud. Используются только встроенные возможности Node.js; SDK и другие сторонние библиотеки не нужны.
+An AI-powered web application that automatically classifies customer support tickets into three categories: Sales, Support, and Cancellation.
 
-## Запуск
+**Live Demo:** [Try the application](https://support-ticket-classifier-w6ga.onrender.com)  
+**Source Code:** [GitHub Repository](https://github.com/Wak3UpF1lthy/support-ticket-classifier)
 
-Требуется Node.js 18 или новее.
+## Features
+
+- **AI-powered classification** using the Groq API.
+- **Three ticket categories:** Sales, Support, and Cancellation.
+- **Web interface** for submitting customer messages and viewing classification results.
+- **Rule-based classifier** implemented in JavaScript for comparison with the AI classifier.
+- **Automated tests** covering classification logic, API validation, error handling, and server behavior.
+- **Input validation** with limits on request size and ticket length.
+- **Error handling** designed to avoid exposing API credentials or customer messages in server logs.
+
+## Tech Stack
+
+- JavaScript (Node.js)
+- Built-in Node.js HTTP server
+- Groq API
+- HTML and CSS
+- Node.js test runner
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18 or later
+- A Groq API key
+
+### Installation
+
+Clone the repository:
 
 ```bash
-npm start
+git clone https://github.com/Wak3UpF1lthy/support-ticket-classifier.git
+cd support-ticket-classifier
 ```
 
-Программа читает `data/tickets.json` и выводит массив объектов с `id` заявки и категорией (`sales`, `support` или `cancellation`).
-
-Локальный режим работает без API-ключа, интернета и внешних запросов.
-
-## Веб-интерфейс
-
-Для запуска веб-интерфейса задайте `GROQ_API_KEY` и выполните:
+Install dependencies:
 
 ```bash
-npm run start:web
+npm install
 ```
 
-Откройте `http://localhost:3000`. Сервер принимает `POST /api/classify` с JSON-телом `{"text":"I want to cancel my subscription"}` и возвращает исходный `text` вместе с категорией. Для выбора порта можно задать переменную `PORT`. Веб-интерфейс использует тот же AI-классификатор и требует доступ к GroqCloud; ключ остаётся только в серверном окружении.
-
-## Классификация через GroqCloud
-
-Используйте `.env.example` как образец переменных, задайте настоящий ключ GroqCloud в `GROQ_API_KEY` и при необходимости настройте `GROQ_MODEL`. Node.js 18 не загружает `.env` автоматически, поэтому установите переменные в окружении перед запуском:
+Create a local environment file:
 
 ```bash
-export GROQ_API_KEY="ваш_ключ"
-export GROQ_MODEL="openai/gpt-oss-20b"
-npm run classify:ai
+cp .env.example .env
 ```
 
-AI-режим отправляет текст заявки в Chat Completions API GroqCloud. Без `GROQ_API_KEY` он завершается с понятной ошибкой; при ошибке API автоматического перехода на локальную классификацию нет. Не публикуйте и не добавляйте настоящий ключ в репозиторий.
+Add your Groq API key to `.env` using the environment variable expected by the application. Keep this file private and never commit it to GitHub.
 
-Заявка должна содержать непустой `id` (строку или число) и непустое текстовое поле `message`. Неизвестные классификатору сообщения относятся к `support`.
+### Run the Application
 
-## Структура классификации
+```bash
+node server.js
+```
 
-`readTicketInputs()` загружает и проверяет исходные заявки отдельно от классификации. `classifyTickets()` принимает функцию-классификатор, включая асинхронную, и проверяет, что результатом является одна из категорий `sales`, `support` или `cancellation`. Локальная реализация находится в `index.js`, AI-классификатор — в `classifyTicketWithAI.js`, HTTP-клиент GroqCloud — в `groq-client.js`.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Ответ модели запрашивается по строгой JSON Schema с обязательными полями `category` и `reason`. AI-модуль дополнительно проверяет JSON и поля ответа; наружу возвращается только строка категории, совместимая с `classifyTickets()`.
+## API
 
-## Тесты
+### Classify a Ticket
+
+**Endpoint:** `POST /api/classify`
+
+**Request body:**
+
+```json
+{
+  "text": "I was charged twice for my subscription."
+}
+```
+
+**Example response:**
+
+```json
+{
+  "text": "I was charged twice for my subscription.",
+  "category": "support"
+}
+```
+
+Supported categories:
+
+- `sales`
+- `support`
+- `cancellation`
+
+The API validates incoming requests and returns appropriate HTTP error responses for invalid or unsupported input.
+
+## Testing
+
+Run the automated test suite:
 
 ```bash
 npm test
 ```
 
-Тесты подменяют клиент GroqCloud и `fetch`, поэтому не отправляют реальные HTTP-запросы и не требуют ключа API.
+The tests cover classification behavior, input validation, malformed requests, oversized payloads, API errors, and safe error logging.
 
-## Оценка качества классификаторов
+## Project Structure
 
-`data/evaluation-tickets.json` содержит синтетические русско- и англоязычные заявки с ожидаемыми категориями. Запустите сравнение локального классификатора и GPT-OSS 20B одной отдельной командой:
-
-```bash
-npm run evaluate:ai
+```text
+.
+├── data/
+├── public/
+│   └── index.html
+├── test/
+├── classification-service.js
+├── classifyTicketWithAI.js
+├── evaluation.js
+├── evaluate.js
+├── groq-client.js
+├── index.js
+├── server.js
+├── package.json
+├── .env.example
+└── README.md
 ```
 
-Оценка отправляет по одному настоящему запросу в GroqCloud на каждую заявку набора (сейчас 12); перед началом команда предупреждает о возможных расходах. Требуется `GROQ_API_KEY`. Ошибка классификации конкретной заявки показывается в таблице и не засчитывается как правильный ответ. Команда `npm test` использует только поддельные классификаторы и не вызывает API.
+## Deployment
 
-Accuracy — доля правильных предсказаний от общего числа примеров, выраженная в процентах. Этот небольшой синтетический набор нужен для сравнения двух вариантов на одинаковых входных данных, но сам по себе не гарантирует качество на реальных заявках: он мал, создан вручную, а результат LLM может меняться.
+The application is deployed on Render:
+
+[Open the live application](https://support-ticket-classifier-w6ga.onrender.com)
+
+The
