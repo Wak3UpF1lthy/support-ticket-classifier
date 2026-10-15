@@ -133,11 +133,12 @@ function createServer({ classify = classifyTicketWithAI } = {}) {
           response.once("finish", () => request.destroy());
         }
         sendJson(response, error.statusCode || 400, {
-          error: error.statusCode === 413
-            ? "Request body is too large."
-            : error.code === "ERR_REQUEST_INTERRUPTED"
-              ? "Request was interrupted before it could be processed."
-              : "Request body must contain valid JSON.",
+          error:
+            error.statusCode === 413
+              ? "Request body is too large."
+              : error.code === "ERR_REQUEST_INTERRUPTED"
+                ? "Request was interrupted before it could be processed."
+                : "Request body must contain valid JSON.",
         });
         return;
       }
@@ -172,16 +173,22 @@ function createServer({ classify = classifyTicketWithAI } = {}) {
           return;
         }
         sendJson(response, 502, {
-          error: "Classification failed. Check the API configuration and try again.",
+          error:
+            "Classification failed. Check the API configuration and try again.",
         });
       }
       return;
     }
 
-    if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html")) {
+    if (
+      request.method === "GET" &&
+      (url.pathname === "/" || url.pathname === "/index.html")
+    ) {
       fs.readFile(INDEX_PATH, (error, html) => {
         if (error) {
-          sendJson(response, 500, { error: "Could not load the web interface." });
+          sendJson(response, 500, {
+            error: "Could not load the web interface.",
+          });
           return;
         }
         response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
@@ -196,8 +203,9 @@ function createServer({ classify = classifyTicketWithAI } = {}) {
 
 if (require.main === module) {
   const port = Number(process.env.PORT) || 3000;
-  createServer().listen(port, () => {
-    console.log(`Support ticket classifier is available at http://localhost:${port}`);
+
+  createServer().listen(port, "0.0.0.0", () => {
+    console.log(`Support ticket classifier is available on port ${port}`);
   });
 }
 
