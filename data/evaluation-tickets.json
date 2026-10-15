@@ -1,0 +1,62 @@
+[
+  {
+    "id": "EV-001",
+    "message": "Сколько стоит семейный тариф на год?",
+    "expectedCategory": "sales"
+  },
+  {
+    "id": "EV-002",
+    "message": "I want to buy a monthly plan. What payment methods do you accept?",
+    "expectedCategory": "sales"
+  },
+  {
+    "id": "EV-003",
+    "message": "Можно оформить заказ на два устройства?",
+    "expectedCategory": "sales"
+  },
+  {
+    "id": "EV-004",
+    "message": "Is the trial free, and how much does the paid plan cost?",
+    "expectedCategory": "sales"
+  },
+  {
+    "id": "EV-005",
+    "message": "Не могу войти в аккаунт после смены пароля.",
+    "expectedCategory": "support"
+  },
+  {
+    "id": "EV-006",
+    "message": "The app crashes whenever I open the settings page.",
+    "expectedCategory": "support"
+  },
+  {
+    "id": "EV-007",
+    "message": "Мой заказ задерживается, подскажите, где его отследить.",
+    "expectedCategory": "support"
+  },
+  {
+    "id": "EV-008",
+    "message": "After the update, my saved preferences disappeared. Can you help?",
+    "expectedCategory": "support"
+  },
+  {
+    "id": "EV-009",
+    "message": "Прошу отменить заказ до его отправки.",
+    "expectedCategory": "cancellation"
+  },
+  {
+    "id": "EV-010",
+    "message": "Please cancel my subscription before the next renewal.",
+    "expectedCategory": "cancellation"
+  },
+  {
+    "id": "EV-011",
+    "message": "Отключите автоматическое продление, но аккаунт оставьте активным.",
+    "expectedCategory": "cancellation"
+  },
+  {
+    "id": "EV-012",
+    "message": "I changed my mind about the purchase; please stop the order from being processed.",
+    "expectedCategory": "cancellation"
+  }
+]

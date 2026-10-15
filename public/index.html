@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b1120" />
+    <title>Классификатор обращений</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #e5eaf3;
+        background: #0b1120;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        --muted: #9aa8bc;
+        --line: #26344a;
+        --panel: #111b2d;
+        --accent: #8ba8ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        display: grid;
+        min-height: 100vh;
+        margin: 0;
+        padding: 40px 20px;
+        place-items: center;
+        background:
+          radial-gradient(ellipse at 50% 0, #172a4b80 0, transparent 52%),
+          #0b1120;
+      }
+
+      main {
+        width: min(100%, 720px);
+      }
+
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin: 0 0 12px;
+        color: #aab8cd;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow-mark {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #8ba8ff;
+        box-shadow: 0 0 14px #8ba8ff80;
+      }
+
+      h1 {
+        margin: 0;
+        color: #f4f7fc;
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
+        letter-spacing: -0.045em;
+        line-height: 1.15;
+      }
+
+      .intro {
+        max-width: 560px;
+        margin: 12px 0 28px;
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.65;
+      }
+
+      .workspace {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: #0f1929;
+        box-shadow: 0 24px 70px #00000040;
+      }
+
+      .workspace-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 17px 22px;
+        border-bottom: 1px solid var(--line);
+        background: #131f32;
+      }
+
+      .workspace-heading h2 {
+        margin: 0;
+        color: #dbe4f1;
+        font-size: 0.91rem;
+        font-weight: 650;
+      }
+
+      .engine-label {
+        color: #8f9db2;
+        font-size: 0.78rem;
+      }
+
+      form {
+        padding: 22px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 9px;
+        color: #c8d2e1;
+        font-size: 0.87rem;
+        font-weight: 600;
+      }
+
+      textarea {
+        display: block;
+        width: 100%;
+        min-height: 148px;
+        padding: 15px 16px;
+        border: 1px solid #33445d;
+        border-radius: 11px;
+        outline: none;
+        color: #edf2fa;
+        background: #0b1423;
+        font: inherit;
+        font-size: 0.96rem;
+        line-height: 1.6;
+        resize: vertical;
+        transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      }
+
+      textarea::placeholder {
+        color: #73829a;
+      }
+
+      textarea:hover {
+        border-color: #50627d;
+      }
+
+      textarea:focus-visible,
+      button:focus-visible {
+        border-color: var(--accent);
+        outline: 3px solid #8ba8ff55;
+        outline-offset: 2px;
+      }
+
+      .form-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 15px;
+      }
+
+      .privacy-note {
+        margin: 0;
+        color: #8795aa;
+        font-size: 0.78rem;
+        line-height: 1.5;
+      }
+
+      button {
+        display: inline-flex;
+        min-height: 44px;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 0 17px;
+        border: 1px solid #91aaff;
+        border-radius: 9px;
+        color: #101a2b;
+        background: #a9bcff;
+        font: inherit;
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-1px);
+        background: #c0ceff;
+        box-shadow: 0 7px 20px #7899ff30;
+      }
+
+      button:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        cursor: wait;
+        opacity: 0.72;
+      }
+
+      .button-spinner,
+      .loading-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spin 750ms linear infinite;
+      }
+
+      .button-spinner[hidden] {
+        display: none;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      #result {
+        display: grid;
+        gap: 14px;
+        padding: 0 22px 22px;
+      }
+
+      #result[hidden] {
+        display: none;
+      }
+
+      #loading {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 14px 16px;
+        border: 1px solid #2b3b53;
+        border-radius: 10px;
+        color: #c6d2e4;
+        background: #142137;
+        font-size: 0.9rem;
+      }
+
+      #loading[hidden] {
+        display: none;
+      }
+
+      .loading-spinner {
+        flex: 0 0 auto;
+        color: #a9bcff;
+      }
+
+      .message-card,
+      .classification-card {
+        padding: 16px 17px;
+        border: 1px solid #293950;
+        border-radius: 11px;
+        background: var(--panel);
+      }
+
+      .result-label {
+        margin: 0 0 9px;
+        color: #8e9db2;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      #submitted-text {
+        margin: 0;
+        color: #e3eaf4;
+        font-size: 0.94rem;
+        line-height: 1.65;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+
+      .classification-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .classification-row .result-label {
+        margin: 0;
+      }
+
+      #category {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 31px;
+        padding: 5px 11px;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      #category[hidden] {
+        display: none;
+      }
+
+      #category::before {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+        content: "";
+      }
+
+      #category.sales {
+        border-color: #207a5055;
+        color: #78e0ad;
+        background: #103b2a;
+      }
+
+      #category.support {
+        border-color: #3d73c455;
+        color: #91bcff;
+        background: #162f51;
+      }
+
+      #category.cancellation {
+        border-color: #a56b2055;
+        color: #ffd078;
+        background: #49351a;
+      }
+
+      #error {
+        margin: 0;
+        padding: 13px 15px;
+        border: 1px solid #8d3d4a;
+        border-radius: 10px;
+        color: #ffb4bd;
+        background: #351b28;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+      }
+
+      #error[hidden] {
+        display: none;
+      }
+
+      @media (max-width: 520px) {
+        body {
+          padding: 28px 14px;
+          place-items: start center;
+        }
+
+        main {
+          margin: auto 0;
+        }
+
+        .intro {
+          margin-bottom: 21px;
+          font-size: 0.94rem;
+        }
+
+        .workspace {
+          border-radius: 14px;
+        }
+
+        .workspace-heading,
+        form {
+          padding-right: 16px;
+          padding-left: 16px;
+        }
+
+        .engine-label {
+          max-width: 125px;
+          text-align: right;
+        }
+
+        textarea {
+          min-height: 132px;
+        }
+
+        .form-footer {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        button {
+          width: 100%;
+        }
+
+        #result {
+          padding-right: 16px;
+          padding-left: 16px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span>AI support tools</p>
+      <h1>Классификатор обращений</h1>
+      <p class="intro">Определите категорию обращения за несколько секунд. Вставьте сообщение — классификатор подберёт подходящую команду.</p>
+
+      <section class="workspace" aria-labelledby="form-heading">
+        <div class="workspace-heading">
+          <h2 id="form-heading">Новое обращение</h2>
+          <span class="engine-label">Классификация через AI</span>
+        </div>
+        <form id="classify-form">
+          <textarea id="message" name="message" aria-label="Текст обращения" placeholder="Например: Не могу войти в аккаунт после смены пароля..." required></textarea>
+          <div class="form-footer">
+            <p class="privacy-note">Результат будет отнесён к продажам, поддержке или отмене.</p>
+            <button id="submit" type="submit">
+              <span id="button-label">Определить категорию</span>
+              <span id="button-spinner" class="button-spinner" aria-hidden="true" hidden></span>
+            </button>
+          </div>
+        </form>
+
+        <section id="result" aria-live="polite" aria-busy="false" hidden>
+          <div id="loading" role="status" hidden>
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <span>Анализируем обращение…</span>
+          </div>
+          <p id="error" role="alert" hidden></p>
+          <article class="message-card" id="message-card" hidden>
+            <p class="result-label">Ваше сообщение</p>
+            <p id="submitted-text"></p>
+          </article>
+          <article class="classification-card" id="classification-card" hidden>
+            <div class="classification-row">
+              <p class="result-label">Категория обращения</p>
+              <span id="category" hidden></span>
+            </div>
+          </article>
+        </section>
+      </section>
+    </main>
+    <script>
+      const form = document.querySelector("#classify-form");
+      const message = document.querySelector("#message");
+      const submit = document.querySelector("#submit");
+      const buttonLabel = document.querySelector("#button-label");
+      const buttonSpinner = document.querySelector("#button-spinner");
+      const result = document.querySelector("#result");
+      const loading = document.querySelector("#loading");
+      const error = document.querySelector("#error");
+      const messageCard = document.querySelector("#message-card");
+      const submittedText = document.querySelector("#submitted-text");
+      const classificationCard = document.querySelector("#classification-card");
+      const category = document.querySelector("#category");
+      const categoryDetails = {
+        sales: { label: "Продажи", className: "sales" },
+        support: { label: "Поддержка", className: "support" },
+        cancellation: { label: "Отмена", className: "cancellation" },
+      };
+
+      message.addEventListener("keydown", event => {
+        if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+          event.preventDefault();
+          form.requestSubmit();
+        }
+      });
+
+      form.addEventListener("submit", async event => {
+        event.preventDefault();
+        result.hidden = false;
+        result.setAttribute("aria-busy", "true");
+        loading.hidden = false;
+        error.hidden = true;
+        messageCard.hidden = true;
+        classificationCard.hidden = true;
+        category.hidden = true;
+        category.className = "";
+        buttonLabel.textContent = "Классифицируем…";
+        buttonSpinner.hidden = false;
+        submit.disabled = true;
+        message.disabled = true;
+
+        try {
+          const response = await fetch("/api/classify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: message.value }),
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(
+              data.error || "Не удалось классифицировать обращение.",
+            );
+          }
+          const categoryInfo = categoryDetails[data.category];
+          if (!categoryInfo) {
+            throw new Error("Сервер вернул неизвестную категорию.");
+          }
+
+          submittedText.textContent = data.text;
+          messageCard.hidden = false;
+          category.textContent = categoryInfo.label;
+          category.classList.add(categoryInfo.className);
+          category.hidden = false;
+          classificationCard.hidden = false;
+        } catch (requestError) {
+          error.textContent = requestError.message;
+          error.hidden = false;
+        } finally {
+          loading.hidden = true;
+          result.setAttribute("aria-busy", "false");
+          buttonLabel.textContent = "Определить категорию";
+          buttonSpinner.hidden = true;
+          submit.disabled = false;
+          message.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

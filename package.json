@@ -1,0 +1,16 @@
+{
+  "name": "ai-builder-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimal ticket classifier built with Node.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "start:web": "node server.js",
+    "classify:ai": "node index.js --ai",
+    "evaluate:ai": "node evaluate.js",
+    "test": "node --test"
+  }
+}
