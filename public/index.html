@@ -1,14 +1,21 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0b1120" />
-    <title>Классификатор обращений</title>
+    <title>AI Support Ticket Classifier</title>
     <style>
       :root {
         color-scheme: dark;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
         color: #e5eaf3;
         background: #0b1120;
         font-synthesis: none;
@@ -131,7 +138,10 @@
         font-size: 0.96rem;
         line-height: 1.6;
         resize: vertical;
-        transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+        transition:
+          border-color 160ms ease,
+          box-shadow 160ms ease,
+          background 160ms ease;
       }
 
       textarea::placeholder {
@@ -180,7 +190,10 @@
         font-size: 0.88rem;
         font-weight: 700;
         cursor: pointer;
-        transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
+        transition:
+          transform 150ms ease,
+          background 150ms ease,
+          box-shadow 150ms ease;
       }
 
       button:hover:not(:disabled) {
@@ -213,7 +226,9 @@
       }
 
       @keyframes spin {
-        to { transform: rotate(360deg); }
+        to {
+          transform: rotate(360deg);
+        }
       }
 
       #result {
@@ -405,22 +420,40 @@
   </head>
   <body>
     <main>
-      <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span>AI support tools</p>
-      <h1>Классификатор обращений</h1>
-      <p class="intro">Определите категорию обращения за несколько секунд. Вставьте сообщение — классификатор подберёт подходящую команду.</p>
+      <p class="eyebrow">
+        <span class="eyebrow-mark" aria-hidden="true"></span>AI support tools
+      </p>
+      <h1>AI Support Ticket Classifier</h1>
+      <p class="intro">
+        Classify customer support tickets in seconds. Enter a message to
+        identify the most relevant category.
+      </p>
 
       <section class="workspace" aria-labelledby="form-heading">
         <div class="workspace-heading">
-          <h2 id="form-heading">Новое обращение</h2>
-          <span class="engine-label">Классификация через AI</span>
+          <h2 id="form-heading">New Ticket</h2>
+          <span class="engine-label">AI-Powered Classification</span>
         </div>
         <form id="classify-form">
-          <textarea id="message" name="message" aria-label="Текст обращения" placeholder="Например: Не могу войти в аккаунт после смены пароля..." required></textarea>
+          <textarea
+            id="message"
+            name="message"
+            aria-label="Customer message"
+            placeholder="Example: I can't log in to my account after changing my password..."
+            required
+          ></textarea>
           <div class="form-footer">
-            <p class="privacy-note">Результат будет отнесён к продажам, поддержке или отмене.</p>
+            <p class="privacy-note">
+              Tickets are classified as Sales, Support, or Cancellation.
+            </p>
             <button id="submit" type="submit">
-              <span id="button-label">Определить категорию</span>
-              <span id="button-spinner" class="button-spinner" aria-hidden="true" hidden></span>
+              <span id="button-label">Classify Ticket</span>
+              <span
+                id="button-spinner"
+                class="button-spinner"
+                aria-hidden="true"
+                hidden
+              ></span>
             </button>
           </div>
         </form>
@@ -428,16 +461,16 @@
         <section id="result" aria-live="polite" aria-busy="false" hidden>
           <div id="loading" role="status" hidden>
             <span class="loading-spinner" aria-hidden="true"></span>
-            <span>Анализируем обращение…</span>
+            <span>Analyzing ticket...</span>
           </div>
           <p id="error" role="alert" hidden></p>
           <article class="message-card" id="message-card" hidden>
-            <p class="result-label">Ваше сообщение</p>
+            <p class="result-label">Your Message</p>
             <p id="submitted-text"></p>
           </article>
           <article class="classification-card" id="classification-card" hidden>
             <div class="classification-row">
-              <p class="result-label">Категория обращения</p>
+              <p class="result-label">Classification Result</p>
               <span id="category" hidden></span>
             </div>
           </article>
@@ -458,9 +491,9 @@
       const classificationCard = document.querySelector("#classification-card");
       const category = document.querySelector("#category");
       const categoryDetails = {
-        sales: { label: "Продажи", className: "sales" },
-        support: { label: "Поддержка", className: "support" },
-        cancellation: { label: "Отмена", className: "cancellation" },
+        sales: { label: "Sales", className: "sales" },
+        support: { label: "Support", className: "support" },
+        cancellation: { label: "Cancellation", className: "cancellation" },
       };
 
       message.addEventListener("keydown", event => {
@@ -480,7 +513,7 @@
         classificationCard.hidden = true;
         category.hidden = true;
         category.className = "";
-        buttonLabel.textContent = "Классифицируем…";
+        buttonLabel.textContent = "Classifying...";
         buttonSpinner.hidden = false;
         submit.disabled = true;
         message.disabled = true;
@@ -493,13 +526,11 @@
           });
           const data = await response.json();
           if (!response.ok) {
-            throw new Error(
-              data.error || "Не удалось классифицировать обращение.",
-            );
+            throw new Error(data.error || "Failed to classify the ticket.");
           }
           const categoryInfo = categoryDetails[data.category];
           if (!categoryInfo) {
-            throw new Error("Сервер вернул неизвестную категорию.");
+            throw new Error("Server returned an unknown category.");
           }
 
           submittedText.textContent = data.text;
@@ -514,7 +545,7 @@
         } finally {
           loading.hidden = true;
           result.setAttribute("aria-busy", "false");
-          buttonLabel.textContent = "Определить категорию";
+          buttonLabel.textContent = "Define the category";
           buttonSpinner.hidden = true;
           submit.disabled = false;
           message.disabled = false;
